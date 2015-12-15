@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy.http import Request
-from scrapyTest.items import TeamStat
+from historicalStats.items import TeamStat
 
 class TeamStatsSpider(scrapy.Spider):
 
@@ -23,7 +23,18 @@ class TeamStatsSpider(scrapy.Spider):
 
 		self.logger.info('A response from %s just arrived!', response.url)
 	
-		for url in response.xpath("//section[@class='fr-gp'][1]//a[@class='ixxa']/@href").extract():
+		for url in response.xpath("//ul[@class='tab-ul']/li/a/@href").extract():
+			print url
+			_url = self.base_url + url
+			print _url
+			yield Request( url= _url, callback=self.parse_months )
+
+
+	def parse_months(self, response):
+
+		self.logger.info('A response from %s just arrived!', response.url)
+
+		for url in response.xpath("//section[@class='fr-gp']//a[@class='ixxa']/@href").extract():
 			print url
 			_url = self.base_url + url.replace("match-commentary","match-stats")
 			print _url

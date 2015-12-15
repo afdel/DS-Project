@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy.http import Request
-from scrapyTest.items import TeamStat
+from sportingScrapper.items import TeamStat
 
 class TeamStatsSpider(scrapy.Spider):
 
