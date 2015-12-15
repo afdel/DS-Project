@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+import scrapy
+from scrapy.http import Request
+from scrapyTest.items import TeamStat
+
+class TeamStatsSpider(scrapy.Spider):
+
+	name = "team-stats"
+	allowed_domains = ['sportinglife.com']
+	start_urls = (
+        	'http://www.sportinglife.com/football/premier-league/results',
+	)
+
+	def __init__(self, name=None, **kwargs):
+                super(TeamStatsSpider, self).__init__(name, **kwargs)
+                self.items_buffer = {}
+                self.base_url = "http://www.sportinglife.com"
+                from scrapy.conf import settings
+                settings.overrides['DOWNLOAD_TIMEOUT'] = 360
+
+
+	def parse(self, response):
+
+		self.logger.info('A response from %s just arrived!', response.url)
+	
+		for url in response.xpath("//section[@class='fr-gp'][1]//a[@class='ixxa']/@href").extract():
+			print url
+			_url = self.base_url + url
+			yield Request( url= _url, callback=self.parse_details )
+
+
+	def parse_details(self, response):
+                print "Start scrapping Detailed Info...."
+                try:
+             
+                        team1_stat = TeamStat()
+                        team2_stat = TeamStat()
+
+                        teams = response.xpath("//h4[@class='ls-match-team']/text()").extract()
+                        
+			team1_stat["team"] = teams[0]
+			team2_stat["team"] = teams[1]
+                        
+			#l_stat["goals"] = v_goals[0].strip()
+
+                        yield team1_stat
+
+
+                except Exception as e:
+                        log.msg("Parsing failed for URL {%s}"%format(response.request.url))
+                        raise
